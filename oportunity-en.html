@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunities by Sector</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --success: #4bb543;
+            --info: #0dcaf0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .sector-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .sector-button {
+            background-color: white;
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sector-button:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sector-button.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .sector-info {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sector-title {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sector-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        .steps-container {
+            margin-top: 20px;
+        }
+        
+        .step {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            background-color: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .step-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .step-description {
+            margin-bottom: 15px;
+        }
+        
+        .step-example {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-style: italic;
+            color: var(--dark);
+        }
+        
+        .user-input {
+            margin-top: 20px;
+        }
+        
+        .user-input label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .user-input textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .user-input textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .emoji-large {
+            font-size: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .sector-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .sector-button {
+                margin-bottom: 5px;
+            }
+            
+            .sector-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .sector-stats {
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Opportunities by Sectors Platform</h1>
+        
+        <div class="sector-buttons" id="sectorButtons">
+            <!-- Buttons will be generated dynamically -->
+        </div>
+        
+        <div id="sectorDetails" class="hidden">
+            <!-- Sector details will be displayed here -->
+        </div>
+    </div>
+    
+    <script>
+        // JSON Data
+        const data = {
+            "sectores": [
+                {
+                    "nombre": "Health",
+                    "emoji": "🏥",
+                    "porcentajePIB": 16.8,
+                    "plataforma": "HealthConnect",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the main users of your health platform and their specific needs.",
+                            "ejemplo": "Rural patients who need medical consultations without traveling long distances."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize the value proposition of your health platform clearly and concisely.",
+                            "ejemplo": "We connect patients with specialist doctors through secure video consultations and digital medical records."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop key questions to validate the viability of your platform with potential users.",
+                            "ejemplo": "How comfortable would you feel receiving a medical diagnosis via video call?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create precise instructions for Claude 3.7 to help you design your health platform.",
+                            "ejemplo": "Design a telemedicine platform that connects rural patients with urban specialists."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Establish concrete steps to launch and scale your health platform.",
+                            "ejemplo": "Start with three medical specialties in five rural communities before expanding."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Housing",
+                    "emoji": "🏡",
+                    "porcentajePIB": 14.3,
+                    "plataforma": "HappyHome",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify who will be the main beneficiaries of your housing platform.",
+                            "ejemplo": "Young families looking to buy their first home with a limited budget."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize the value proposition of your real estate platform in an attractive way.",
+                            "ejemplo": "We simplify the search, financing, and acquisition of homes through intuitive digital tools."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate real needs in the real estate market.",
+                            "ejemplo": "What are the three biggest challenges you face when looking for a new home?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your real estate platform.",
+                            "ejemplo": "Design a platform that helps first-time buyers understand and navigate the home buying process."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Establish the stages to launch and grow your housing platform.",
+                            "ejemplo": "Start in two cities with high housing deficit before expanding nationally."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Food",
+                    "emoji": "🍎",
+                    "porcentajePIB": 14.0,
+                    "plataforma": "HappyFood",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the key actors in the food chain who will use your platform.",
+                            "ejemplo": "Small farmers looking to sell directly to the end consumer."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Define how your platform will solve problems in the food supply chain.",
+                            "ejemplo": "We connect local farmers with consumers to reduce intermediaries and guarantee fresh products."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate the viability of your food platform.",
+                            "ejemplo": "Would you pay a small premium for food that comes directly from the farm to your table?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your food platform.",
+                            "ejemplo": "Design a platform that reduces food waste by connecting producers with local consumers."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the steps to implement and scale your food platform.",
+                            "ejemplo": "Start with vegetable producers in three agricultural regions close to urban centers."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Financial",
+                    "emoji": "💰",
+                    "porcentajePIB": 8.8,
+                    "plataforma": "EasyFinance",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the profile of users who will benefit from your financial platform.",
+                            "ejemplo": "Micro-entrepreneurs without credit history who need financing to grow."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will solve specific financial problems.",
+                            "ejemplo": "We democratize access to financial services through alternative credit assessment technology."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate the financial needs of your target users.",
+                            "ejemplo": "What information would you be willing to share to get better credit terms?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your financial platform.",
+                            "ejemplo": "Design a financial inclusion platform that uses alternative data to assess creditworthiness."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Establish steps to launch and grow your financial platform.",
+                            "ejemplo": "Start with microloans for retail merchants before expanding to other segments."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Education",
+                    "emoji": "📚",
+                    "porcentajePIB": 6.7,
+                    "plataforma": "LearnNow",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the profiles of students and educators who will use your platform.",
+                            "ejemplo": "High school students with difficulties accessing quality university preparation."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Define how your educational platform will solve specific learning problems.",
+                            "ejemplo": "We offer personalized tutoring through adaptive AI that identifies and reinforces weak areas."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate the real educational needs of your users.",
+                            "ejemplo": "What educational content format do you find most effective for learning complex concepts?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your educational platform.",
+                            "ejemplo": "Design an adaptive learning platform that identifies and corrects knowledge gaps."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the stages to launch and scale your educational platform.",
+                            "ejemplo": "Start with mathematics and sciences in public high schools before expanding subjects."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Vehicles",
+                    "emoji": "🚗",
+                    "porcentajePIB": 6.5,
+                    "plataforma": "SmartAuto",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify who will be the main users of your automotive platform.",
+                            "ejemplo": "Vehicle owners looking to optimize maintenance and reduce operating costs."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will solve specific problems in the automotive sector.",
+                            "ejemplo": "We connect vehicles, drivers, and repair shops through IoT to predict failures and optimize maintenance."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate real needs in the automotive market.",
+                            "ejemplo": "Would you install a connected device in your car if it could reduce maintenance costs by 30%?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your automotive platform.",
+                            "ejemplo": "Design a platform that uses connected vehicle data to predict mechanical failures."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the stages to launch and grow your automotive platform.",
+                            "ejemplo": "Start with corporate fleets before expanding to the private vehicle market."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Energy",
+                    "emoji": "⚡",
+                    "porcentajePIB": 5.9,
+                    "plataforma": "SmartEnergy",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify who will benefit from your energy platform and their needs.",
+                            "ejemplo": "Urban households interested in reducing their electricity consumption and carbon footprint."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will improve energy efficiency in a tangible way.",
+                            "ejemplo": "We optimize energy consumption through real-time analysis and personalized recommendations."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate real interest in energy efficiency solutions.",
+                            "ejemplo": "What percentage of savings on your bill would justify investing in energy monitoring devices?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your energy platform.",
+                            "ejemplo": "Design a platform that analyzes energy consumption patterns and suggests personalized optimizations."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the steps to implement and scale your energy efficiency platform.",
+                            "ejemplo": "Start with 100 pilot homes before expanding to complete residential complexes."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Furniture",
+                    "emoji": "🛋️",
+                    "porcentajePIB": 4.1,
+                    "plataforma": "VirtualFurniture",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the profiles of furniture buyers who will use your platform.",
+                            "ejemplo": "Young couples looking to furnish their first home with a limited budget."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will transform the furniture shopping experience.",
+                            "ejemplo": "Visualize furniture in your real space through augmented reality before buying it."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate the pain points in furniture shopping.",
+                            "ejemplo": "What is your biggest concern when buying furniture without seeing it physically?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your furniture platform.",
+                            "ejemplo": "Design a platform that uses AR to show how furniture would look in the customer's home."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the stages to launch and scale your furniture platform.",
+                            "ejemplo": "Start with 5 local manufacturers before expanding to national and international brands."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Transport",
+                    "emoji": "🚚",
+                    "porcentajePIB": 3.7,
+                    "plataforma": "LogiFast",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the actors in the logistics chain who will use your platform.",
+                            "ejemplo": "Small businesses that need fast and affordable home deliveries."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will optimize last-mile logistics.",
+                            "ejemplo": "We connect businesses with independent transporters through AI-optimized routes."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate the real logistics needs of the market.",
+                            "ejemplo": "How much time and money do you currently invest in coordinating your home deliveries?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your logistics platform.",
+                            "ejemplo": "Design a platform that optimizes delivery routes by aggregating shipments from multiple businesses."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the steps to launch and scale your transport and logistics platform.",
+                            "ejemplo": "Start with deliveries in 3 urban districts before expanding to the entire city."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Clothing",
+                    "emoji": "👕",
+                    "porcentajePIB": 3.6,
+                    "plataforma": "CircularFashion",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the profiles of fashion consumers who will use your platform.",
+                            "ejemplo": "Young people concerned about sustainability who seek to reduce their fast fashion consumption."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will transform fashion consumption towards more sustainable models.",
+                            "ejemplo": "We facilitate the exchange, resale, and upcycling of garments to extend their useful life."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate interest in alternative fashion consumption models.",
+                            "ejemplo": "What percentage of your wardrobe would you be willing to acquire second-hand if it were simple?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your fashion platform.",
+                            "ejemplo": "Design a platform that facilitates the circular economy in the fashion sector through verified exchanges."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the stages to launch and scale your circular fashion platform.",
+                            "ejemplo": "Start with women's casual clothing before expanding to all categories and genders."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Electronics",
+                    "emoji": "💻",
+                    "porcentajePIB": 3.6,
+                    "plataforma": "GreenTech",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the profiles of electronic product users for your platform.",
+                            "ejemplo": "Professionals who regularly update devices generating unused electronics."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will address the problem of electronic waste.",
+                            "ejemplo": "We facilitate the recovery, reconditioning, and redistribution of used electronic devices."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate interest in reconditioned electronics.",
+                            "ejemplo": "What guarantee would you need to trust a certified reconditioned device?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your electronics platform.",
+                            "ejemplo": "Design a platform that connects device donors with technicians and new users."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the steps to launch and scale your sustainable electronics platform.",
+                            "ejemplo": "Start with smartphones and tablets before expanding to computers and other devices."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Care",
+                    "emoji": "✨",
+                    "porcentajePIB": 2.0,
+                    "plataforma": "CareConnect",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify who will be the users of care services on your platform.",
+                            "ejemplo": "Families with elderly members who need partial assistance but maintain independence."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will solve personal care needs.",
+                            "ejemplo": "We connect people who need assistance with verified caregivers according to specific needs."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate the real needs for care services.",
+                            "ejemplo": "What aspects are essential to verify before hiring a caregiver for your family member?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your care platform.",
+                            "ejemplo": "Design a platform that verifies, trains, and connects caregivers with families in need."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the steps to launch and scale your care services platform.",
+                            "ejemplo": "Start with elderly care before expanding to childcare and people with disabilities."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Home Appliances",
+                    "emoji": "🔧",
+                    "porcentajePIB": 1.6,
+                    "plataforma": "ConnectedHome",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the profiles of households that would benefit from your home appliance platform.",
+                            "ejemplo": "Urban families interested in smart homes but without advanced technical knowledge."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will improve the efficiency of home appliances.",
+                            "ejemplo": "We integrate existing home devices into a smart ecosystem without the need to replace them."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate interest in appliance optimization.",
+                            "ejemplo": "What household tasks would you like to automate or monitor remotely?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your smart home platform.",
+                            "ejemplo": "Design a platform that integrates old appliances into a smart home system."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the steps to launch and scale your home equipment platform.",
+                            "ejemplo": "Start with lighting and climate control before expanding to all appliances."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Cleaning",
+                    "emoji": "🧼",
+                    "porcentajePIB": 1.5,
+                    "plataforma": "EcoClean",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify who will be the main users of your cleaning platform.",
+                            "ejemplo": "Urban households concerned about the environmental impact of conventional cleaning products."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will transform cleaning habits towards sustainable models.",
+                            "ejemplo": "We offer concentrated cleaning products with returnable packaging and personalized formulas."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate interest in eco-friendly cleaning solutions.",
+                            "ejemplo": "Would you be willing to use refillable containers to reduce single-use plastics?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your cleaning platform.",
+                            "ejemplo": "Design a subscription platform for concentrated products with reusable containers."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the steps to launch and scale your cleaning products platform.",
+                            "ejemplo": "Start with basic products (soap, detergent) before expanding to the full range of cleaning products."
+                        }
+                    ]
+                },
+                {
+                    "nombre": "Luxury",
+                    "emoji": "💎",
+                    "porcentajePIB": 1.1,
+                    "plataforma": "AccessibleLuxury",
+                    "pasos": [
+                        {
+                            "paso": 1,
+                            "titulo": "Solution Users",
+                            "descripcion": "Identify the profiles of luxury item consumers for your platform.",
+                            "ejemplo": "Urban professionals who want to access premium items without purchasing them permanently."
+                        },
+                        {
+                            "paso": 2,
+                            "titulo": "One-page Solution Offer",
+                            "descripcion": "Summarize how your platform will democratize access to luxury goods.",
+                            "ejemplo": "We facilitate access to luxury items through rental, co-ownership, or rotating membership."
+                        },
+                        {
+                            "paso": 3,
+                            "titulo": "Questionnaire to Test the Solution",
+                            "descripcion": "Develop questions to validate interest in alternative luxury consumption models.",
+                            "ejemplo": "Would you prefer to access five designer bags per year or own one permanently?"
+                        },
+                        {
+                            "paso": 4,
+                            "titulo": "Prompt Development for Claude 3.7",
+                            "descripcion": "Create instructions for Claude 3.7 to help you design your shared luxury platform.",
+                            "ejemplo": "Design a subscription platform that allows access to luxury items for a limited time."
+                        },
+                        {
+                            "paso": 5,
+                            "titulo": "Implementation Plan",
+                            "descripcion": "Define the steps to launch and scale your luxury items platform.",
+                            "ejemplo": "Start with fashion accessories before expanding to watches, jewelry, and premium experiences."
+                        }
+                    ]
+                }
+            ]
+        };
+        
+        // Function to generate sector buttons
+        function generateSectorButtons() {
+            const sectorButtonsContainer = document.getElementById('sectorButtons');
+            
+            data.sectores.forEach(sector => {
+                const button = document.createElement('button');
+                button.className = 'sector-button';
+                button.dataset.sector = sector.nombre;
+                button.innerHTML = `${sector.emoji} ${sector.nombre} (${sector.porcentajePIB}%)`;
+                
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.sector-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Add active class to selected button
+                    button.classList.add('active');
+                    
+                    // Show sector details
+                    showSectorDetails(sector);
+                });
+                
+                sectorButtonsContainer.appendChild(button);
+            });
+        }
+        
+        // Function to show the details of the selected sector
+        function showSectorDetails(sector) {
+            const sectorDetails = document.getElementById('sectorDetails');
+            sectorDetails.classList.remove('hidden');
+            
+            // Generate HTML for sector details
+            let html = `
+                <div class="sector-info">
+                    <div class="sector-header">
+                        <div class="sector-title">
+                            <span class="emoji-large">${sector.emoji}</span> ${sector.nombre}
+                        </div>
+                        <div class="sector-stats">
+                            <div class="stat">
+                                <div class="stat-value">${sector.porcentajePIB}%</div>
+                                <div class="stat-label">of GDP</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-value">${sector.plataforma}</div>
+                                <div class="stat-label">Platform</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="steps-container">
+            `;
+            
+            // Generate HTML for each step
+            sector.pasos.forEach(paso => {
+                const stepId = `${sector.nombre.toLowerCase()}-paso-${paso.paso}`;
+                
+                html += `
+                    <div class="step">
+                        <div class="step-header">
+                            <div class="step-number">${paso.paso}</div>
+                            <div class="step-title">${paso.titulo}</div>
+                        </div>
+                        <div class="step-description">${paso.descripcion}</div>
+                        <div class="step-example">Example: ${paso.ejemplo}</div>
+                        
+                        <div class="user-input">
+                            <label for="${stepId}">Your adaptation:</label>
+                            <textarea id="${stepId}" placeholder="Adapt this step to your opportunity..."></textarea>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            sectorDetails.innerHTML = html;
+            
+            // Save textarea content when it changes
+            document.querySelectorAll('.user-input textarea').forEach(textarea => {
+                textarea.addEventListener('input', () => {
+                    localStorage.setItem(textarea.id, textarea.value);
+                });
+                
+                // Load saved content if it exists
+                const savedContent = localStorage.getItem(textarea.id);
+                if (savedContent) {
+                    textarea.value = savedContent;
+                }
+            });
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            generateSectorButtons();
+            
+            // Select the first sector by default
+            if (data.sectores.length > 0) {
+                const firstSectorButton = document.querySelector('.sector-button');
+                if (firstSectorButton) {
+                    firstSectorButton.click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
